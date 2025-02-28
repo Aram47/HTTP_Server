@@ -1,10 +1,10 @@
 #ifndef __HTTP_SERVER__
 #define __HTTP_SERVER__
 
-#include <iostream>  // Для ввода/вывода (std::cout, std::cerr)
-#include <cstring>   // Для работы со строками (strlen, memset)
-#include <unistd.h>  // Для функций close(), read(), write()
-#include <arpa/inet.h> // Для работы с сетевыми функциями (socket(), bind(), listen(), accept())
+#include <iostream>
+#include <cstring>
+#include <unistd.h>
+#include <arpa/inet.h>
 #include <bits/c++config.h>
 #include <functional>
 
