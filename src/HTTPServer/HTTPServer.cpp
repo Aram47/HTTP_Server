@@ -62,6 +62,7 @@ void HTTPServer::Listen(std::size_t PORT, std::function<void()> cb) {
   }
 
   socklen_t client_address_size = sizeof(this->client_address);
+  cb();
 
   this->client_socket = accept(this->server_socket, 
                             (sockaddr*)&this->client_address, 
@@ -72,5 +73,5 @@ void HTTPServer::Listen(std::size_t PORT, std::function<void()> cb) {
       return;
   }
 
-  cb();
+  // cb();
 }
