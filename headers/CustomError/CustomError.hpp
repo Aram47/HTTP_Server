@@ -8,7 +8,13 @@ class CustomError : public std::exception {
 public:
 	CustomError(const std::string&);
 public:
-	const char* what() const _NOEXCEPT;
+	const char* what() const
+#ifdef __APPLE__
+	_NOEXCEPT
+#else
+	_GLIBCXX_TXN_SAFE_DYN _GLIBCXX_NOTHROW
+#endif
+;
 private:
 	CustomError& operator=(const CustomError&) { return *this; };
 private:
