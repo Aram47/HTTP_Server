@@ -1,6 +1,6 @@
-#include "../../headers/HTTPServer/HTTPServer.hpp"
+#include <HTTPServer.hpp>
 
-HTTPServer::HTTPServer(): 
+HTTPServer::HTTPServer():
   server_socket{0},
   client_socket{0},
   server_address{},
@@ -17,6 +17,7 @@ void HTTPServer::Listen(std::size_t PORT, std::function<void()> cb) {
     std::cerr << "Invalid PORT" << std::endl;
     return;
   }
+	this->PORT = PORT;
   /*
     AF_INET       = using IPv4
     SOCK_STREAM   = using TCP protocol
@@ -31,21 +32,24 @@ void HTTPServer::Listen(std::size_t PORT, std::function<void()> cb) {
     return;
   }
 
-  // 
+  //
   /*
     AF_INET = We use IPv4;
-    htons(PORT) = converts a port from host format (regular number) to 
+    htons(PORT) = converts a port from host format (regular number) to
                   network format (big-endian)
-    INADDR_ANY = means that the server will accept connections to 
+    INADDR_ANY = means that the server will accept connections to
                   all available IP addresses.
   */
+ 	int opt = 1;
+	setsockopt(this->server_socket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
+
   this->server_address.sin_family = AF_INET;
   this->server_address.sin_port = htons(PORT);
   this->server_address.sin_addr.s_addr = INADDR_ANY;
 
-  if (bind(this->server_socket, 
-           (sockaddr*)&this->server_address, 
-           sizeof(this->server_address)) == -1) 
+  if (bind(this->server_socket,
+           (sockaddr*)&this->server_address,
+           sizeof(this->server_address)) == -1)
   {
     std::cerr << "Error binding socket!" << std::endl;
     return;
@@ -55,8 +59,12 @@ void HTTPServer::Listen(std::size_t PORT, std::function<void()> cb) {
     SOMAXCONN = the maximum number of pending connections in the queue.
     SOMAXCONN = 4096
   */
-
-  if (listen(this->server_socket, SOMAXCONN) == -1) {
+	#ifdef __APPLE__
+  	const int BACKLOG = 128;  // macOS may have lower SOMAXCONN
+	#else
+    const int BACKLOG = SOMAXCONN;
+	#endif
+  if (listen(this->server_socket, BACKLOG) == -1) {
     std::cerr << "Listening error!" << std::endl;
     return;
   }
@@ -64,10 +72,10 @@ void HTTPServer::Listen(std::size_t PORT, std::function<void()> cb) {
   socklen_t client_address_size = sizeof(this->client_address);
   cb();
 
-  this->client_socket = accept(this->server_socket, 
-                            (sockaddr*)&this->client_address, 
+  this->client_socket = accept(this->server_socket,
+                            (sockaddr*)&this->client_address,
                             &client_address_size);
-  
+
   if (this->client_socket == -1) {
       std::cerr << "Error accepting connection!" << std::endl;
       return;

@@ -5,8 +5,17 @@
 #include <cstring>
 #include <unistd.h>
 #include <arpa/inet.h>
-#include <bits/c++config.h>
 #include <functional>
+
+#ifdef __linux__
+#include <bits/c++config.h>
+#endif
+
+#ifdef __APPLE__
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#endif
 
 class HTTPServer {
 public:

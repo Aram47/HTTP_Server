@@ -1,21 +1,38 @@
-G++ = g++
-FILES = main.cpp 														\
-				./src/HTTPServer/HTTPServer.cpp 		\
-				./src/Request/Request.cpp						\
-				./src/Response/Response.cpp					\
+RED		= \033[1;31m
+GREEN	= \033[1;32m
+YELLOW	= \033[1;33m
+RESET	= \033[0;37m
+SKY		= \033[1;36m
 
-FLAGS = -Wall -Wextra -Werror
-STANDART = -std=c++98
-EXE = server
-DEL = rm
+CPP = g++ -std=c++17
+SRCSPATH = ./
+INCLPATH = ./headers/
 
-all:
-# commented :)))
-# $(G++) $(FLAGS) $(STANDART) $(FILES) -o $(EXE)
-	$(G++) $(FILES) -o $(EXE)
+SRCS = $(shell find $(SRCSPATH) -name "*.cpp")
+OBJS = $(patsubst $(SRCSPATH)%.cpp, $(SRCSPATH)%.o, $(SRCS))
 
-run:
-	./$(EXE)
+CFLAGS = -Wall -Wextra -Werror $(addprefix -I, $(shell find $(INCLPATH) -type d))
+# -g-fsanitize=address
+NAME = webserv
 
-del:
-	$(DEL) $(EXE)
+all : $(NAME)
+
+$(NAME) : $(OBJS)
+	@$(CPP) $^ -o $@
+	@echo "$(GREEN) Executable file has been created $(RESET)"
+
+$(SRCSPATH)%.o : $(SRCSPATH)%.cpp
+	@$(CPP) $(CFLAGS) -c $< -o $@
+	@echo "$(YELLOW) Object files have been created $(RESET)"
+
+clean :
+	@rm -f $(OBJS)
+	@echo "$(RED) Object files have been deleted $(RESET)"
+
+fclean : clean
+	@rm -f $(NAME)
+	@echo "$(RED) Executable file has been deleted $(RESET)"
+
+re : fclean all
+
+.PHONY : all clean fclean re
