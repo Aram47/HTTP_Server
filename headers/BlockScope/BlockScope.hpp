@@ -1,7 +1,7 @@
 #ifndef __BLOCK_SCOPE__
 #define __BLOCK_SCOPE__
 
-#include "../Block/Block.hpp"
+#include <Block.hpp>
 
 class BlockScope : public Block {};
 

@@ -1,4 +1,4 @@
-#include "../../headers/CustomError/CustomError.hpp"
+#include <CustomError.hpp>
 
 CustomError::CustomError(const std::string& msg) : message{msg} {};
 

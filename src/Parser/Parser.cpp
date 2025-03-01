@@ -1,4 +1,4 @@
-#include "../../headers/Parser/Parser.hpp"
+#include <Parser.hpp>
 
 using Tokens = std::vector<std::string>;
 using ConfigData = std::unordered_map<std::string, Block* const>;

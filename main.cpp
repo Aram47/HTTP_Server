@@ -1,6 +1,6 @@
 #include <iostream>
-#include "./headers/HTTPServer/HTTPServer.hpp"
-#include "./headers/header.hpp"
+#include <HTTPServer.hpp>
+#include <header.hpp>
 
 int main(int argc, char** argv) {
   try {

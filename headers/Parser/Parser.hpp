@@ -4,7 +4,7 @@
 #include <unordered_map>
 #include <vector>
 #include <string>
-#include "../Block/Block.hpp"
+#include <Block.hpp>
 
 class Parser {
 using Tokens = std::vector<std::string>;

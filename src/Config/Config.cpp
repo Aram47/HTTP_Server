@@ -1,4 +1,4 @@
-#include "../../headers/Config/Config.hpp"
+#include <Config.hpp>
 
 using ConfigData = std::unordered_map<std::string, Block* const>;
 

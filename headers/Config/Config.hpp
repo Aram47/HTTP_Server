@@ -3,7 +3,7 @@
 
 #include <unordered_map>
 #include <string>
-#include "../Block/Block.hpp"
+#include <Block.hpp>
 
 class Config {
 using ConfigData = std::unordered_map<std::string, Block* const>;

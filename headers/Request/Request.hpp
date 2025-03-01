@@ -1,7 +1,7 @@
 #ifndef __REQUEST__
 #define __REQUEST__
 
-#include "../Streamable/Streamable.hpp"
+#include <Streamable.hpp>
 
 class Request : public Streamable {};
 
