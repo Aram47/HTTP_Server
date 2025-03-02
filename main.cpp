@@ -11,9 +11,10 @@ int main(int argc, char** argv) {
 
 		HTTPServer server;
 		const std::size_t PORT = 4568;
-  		server.Listen(PORT, []() {
-    		std::cout << "Server listening on PORT: " << PORT << std::endl;
-  		});
+		
+  	server.Listen(PORT, []() {
+    	std::cout << "Server listening on PORT: " << PORT << std::endl;
+  	});
 
 	} catch (std::exception& e) {
 		std::cerr << e.what() << std::endl;

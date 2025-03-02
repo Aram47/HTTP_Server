@@ -1,13 +1,26 @@
 #include <HTTPServer.hpp>
 
+using middleware = std::function<void(const Streamable&, 
+                                      const Streamable&, 
+                                      const Next&)>;
+
 HTTPServer::HTTPServer():
+  server_address{},
+  client_address{},
   server_socket{0},
   client_socket{0},
-  server_address{},
-  client_address{}
+  __use_table{},
+  __get_table{},
+  __post_table{},
+  __delete_table{},
+  __put_table{},
+  __patch_table{},
+  __head_table{},
+  __options_table{}
 {}
 
-HTTPServer::~HTTPServer() {
+HTTPServer::~HTTPServer()
+{
   close(this->client_socket);
   close(this->server_socket);
 }
@@ -82,4 +95,157 @@ void HTTPServer::Listen(std::size_t PORT, std::function<void()> cb) {
   }
 
   // cb();
-}
+};
+
+// not finished yet
+
+void HTTPServer::Use(middleware __middleware) {
+  for (auto it : this->__get_table) {
+    it.second.push_back(__middleware);
+  }
+  for (auto it : this->__post_table) {
+    it.second.push_back(__middleware);
+  }
+  for (auto it : this->__delete_table) {
+    it.second.push_back(__middleware);
+  }
+  for (auto it : this->__put_table) {
+    it.second.push_back(__middleware);
+  }
+  for (auto it : this->__patch_table) {
+    it.second.push_back(__middleware);
+  }
+  for (auto it : this->__head_table) {
+    it.second.push_back(__middleware);
+  }
+  for (auto it : this->__options_table) {
+    it.second.push_back(__middleware);
+  }
+};
+
+void HTTPServer::Use(const std::vector<middleware>& __middlewares) {
+  for (auto middleware : __middlewares) {
+    this->Use(middleware);
+  }
+};
+
+void HTTPServer::Use(const std::string& __path, middleware __middleware) {
+  this->__use_table[__path].push_back(__middleware);
+};
+
+void HTTPServer::Use(const std::string& __path, 
+                     const std::vector<middleware>& __middlewares) 
+{
+  for (auto middleware : __middlewares) {
+    this->Use(__path, middleware);
+  }
+};
+
+void HTTPServer::Get(const std::string& __path, 
+                     const std::vector<middleware>& __middlewares) 
+{
+  for (auto middleware : __middlewares) {
+    this->__get_table[__path].push_back(middleware);
+  }
+};
+
+void HTTPServer::Post(const std::string& __path, 
+                      const std::vector<middleware>& __middlewares)
+{
+  for (auto middleware : __middlewares) {
+    this->__post_table[__path].push_back(middleware);
+  }
+};
+
+void HTTPServer::Delete(const std::string& __path, 
+                        const std::vector<middleware>& __middlewares) 
+{
+  for (auto middleware : __middlewares) {
+    this->__delete_table[__path].push_back(middleware);
+  }
+};
+
+void HTTPServer::Put(const std::string& __path, 
+                     const std::vector<middleware>& __middlewares) 
+{
+  for (auto middleware : __middlewares) {
+    this->__put_table[__path].push_back(middleware);
+  }
+};
+
+void HTTPServer::Patch(const std::string& __path, 
+                       const std::vector<middleware>& __middlewares) 
+{
+  for (auto middleware : __middlewares) {
+    this->__patch_table[__path].push_back(middleware);
+  }
+};
+
+void HTTPServer::Head(const std::string& __path, 
+                      const std::vector<middleware>& __middlewares) 
+{
+  for (auto middleware : __middlewares) {
+    this->__head_table[__path].push_back(middleware);
+  }
+};
+
+void HTTPServer::Options(const std::string& __path, 
+                         const std::vector<middleware>& __middlewares) 
+{
+  for (auto middleware : __middlewares) {
+    this->__options_table[__path].push_back(middleware);
+  }
+};
+
+// void HTTPServer::HandleRequest() {
+//   char buffer[1024] = {0};
+//   ssize_t valread = read(this->client_socket, buffer, 1024);
+//   if (valread == -1) {
+//     std::cerr << "Error reading from socket!" << std::endl;
+//     return;
+//   }
+
+//   std::string request(buffer);
+//   std::string method = request.substr(0, request.find(' '));
+//   std::string path = request.substr(request.find(' ') + 1, request.find(' ', request.find(' ') + 1) - request.find(' ') - 1);
+//   std::string body = request.substr(request.find("\r\n\r\n") + 4);
+
+//   Streamable req;
+//   req.method = method;
+//   req.path = path;
+//   req.body = body;
+
+//   Streamable res;
+//   res.method = method;
+//   res.path = path;
+//   res.body = body;
+
+//   Next next;
+//   next.__use_table = this->__use_table;
+//   next.__get_table = this->__get_table;
+//   next.__post_table = this->__post_table;
+//   next.__delete_table = this->__delete_table;
+//   next.__put_table = this->__put_table;
+//   next.__patch_table = this->__patch_table;
+//   next.__head_table = this->__head_table;
+//   next.__options_table = this->__options_table;
+
+//   next.__use_table[path] = this->__use_table[path];
+//   next.__get_table[path] = this->__get_table[path];
+//   next.__post_table[path] = this->__post_table[path];
+//   next.__delete_table[path] = this->__delete_table[path];
+//   next.__put_table[path] = this->__put_table[path];
+//   next.__patch_table[path] = this->__patch_table[path];
+//   next.__head_table[path] = this->__head_table[path];
+//   next.__options_table[path] = this->__options_table[path];
+
+//   next.__use_table["/"] = this->__use_table["/"];
+//   next.__get_table["/"] = this->__get_table["/"];
+//   next.__post_table["/"] = this->__post_table["/"];
+//   next.__delete_table["/"] = this->__delete_table["/"];
+//   next.__put_table["/"] = this->__put_table["/"];
+//   next.__patch_table["/"] = this->__patch_table["/"];
+//   next.__head_table
+//   ["/"] = this->__head_table["/"];
+//   next.__options_table["/"] = this->__options_table["/"];
+// };
