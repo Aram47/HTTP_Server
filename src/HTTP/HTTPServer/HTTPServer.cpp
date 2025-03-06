@@ -215,27 +215,57 @@ Router HTTPServer::__Router::Use(const std::string& __path, const std::vector<HT
 };
 
 Router HTTPServer::__Router::Get(const std::string& __path, const std::vector<HTTPServer::req_handler>& __req_handlers) {
-  std::cout << __path << std::endl;
-  for (auto it : __req_handlers) {
-    
+  if (this->__get_table.find(__path) != this->__get_table.end()) {
+    throw new CustomError("GET method already exists");
   }
-  return Router();
+
+  if (this->__use_table.find("/") != this->__use_table.end()) {
+    for (auto it : __use_table["/"]) {
+      this->__get_table[__path].push_back(it);
+    }
+  }
+
+  for (auto it : __req_handlers) {
+    this->__get_table[__path].push_back(it);
+  }
+
+  return *this;
 };
 
 Router HTTPServer::__Router::Post(const std::string& __path, const std::vector<HTTPServer::req_handler>& __req_handlers) {
-  std::cout << __path << std::endl;
-  for (auto it : __req_handlers) {
-    
+  if (this->__post_table.find(__path) != this->__post_table.end()) {
+    throw new CustomError("POST method already exists");
   }
-  return Router();
+
+  if (this->__use_table.find("/") != this->__use_table.end()) {
+    for (auto it : __use_table["/"]) {
+      this->__post_table[__path].push_back(it);
+    }
+  }
+
+  for (auto it : __req_handlers) {
+    this->__post_table[__path].push_back(it);
+  }
+
+  return *this;
 };
 
 Router HTTPServer::__Router::Delete(const std::string& __path, const std::vector<HTTPServer::req_handler>& __req_handlers) {
-  std::cout << __path << std::endl;
-  for (auto it : __req_handlers) {
-    
+  if (this->__delete_table.find(__path) != this->__delete_table.end()) {
+    throw new CustomError("POST method already exists");
   }
-  return Router();
+
+  if (this->__use_table.find("/") != this->__use_table.end()) {
+    for (auto it : __use_table["/"]) {
+      this->__delete_table[__path].push_back(it);
+    }
+  }
+
+  for (auto it : __req_handlers) {
+    this->__delete_table[__path].push_back(it);
+  }
+
+  return *this;
 };
 
 // Router HTTPServer::__Router::Put(const std::string& __path, const std::vector<HTTPServer::req_handler>& __req_handlers) {

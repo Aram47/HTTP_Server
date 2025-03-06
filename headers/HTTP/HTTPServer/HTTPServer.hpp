@@ -19,6 +19,7 @@
 #include <netinet/in.h>
 #endif
 
+#include <CustomError.hpp>
 #include <Request.hpp>
 #include <Response.hpp> 
 #include <Next.hpp>
