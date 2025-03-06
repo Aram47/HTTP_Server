@@ -1,8 +1,13 @@
 #ifndef __RESPONSE__
 #define __RESPONSE__
 
-#include <Streamable.hpp>
+#include <iostream>
 
-class Response : public Streamable {};
+class Response {
+public:
+  void response() const {
+    std::cout << "Responding..." << std::endl;
+  }
+};
 
 #endif

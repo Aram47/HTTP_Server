@@ -1,8 +1,6 @@
 #include <HTTPServer.hpp>
 
-using middleware = std::function<void(const Streamable&, 
-                                      const Streamable&, 
-                                      const Next&)>;
+using Router = HTTPServer::__Router;
 
 HTTPServer::HTTPServer():
   server_address{},
@@ -12,11 +10,11 @@ HTTPServer::HTTPServer():
   __use_table{},
   __get_table{},
   __post_table{},
-  __delete_table{},
-  __put_table{},
-  __patch_table{},
-  __head_table{},
-  __options_table{}
+  __delete_table{}
+  // __put_table{},
+  // __patch_table{},
+  // __head_table{},
+  // __options_table{}
 {}
 
 HTTPServer::~HTTPServer()
@@ -25,12 +23,23 @@ HTTPServer::~HTTPServer()
   close(this->server_socket);
 }
 
-void HTTPServer::Listen(std::size_t PORT, std::function<void()> cb) {
+void HTTPServer::ListenHelper(std::size_t PORT, const std::string& HOST, std::function<void()> cb) {
   if (PORT > 65535) {
     std::cerr << "Invalid PORT" << std::endl;
     return;
   }
 	this->PORT = PORT;
+
+  /*
+    will check inputed HOST
+    and after that will initialize this->HOST
+  */
+  if (HOST.empty() /*and some checks too*/) {
+    std::cerr << "Invalid HOST" << std::endl;
+    return;
+  }
+  this->HOST = HOST;
+
   /*
     AF_INET       = using IPv4
     SOCK_STREAM   = using TCP protocol
@@ -95,107 +104,165 @@ void HTTPServer::Listen(std::size_t PORT, std::function<void()> cb) {
   }
 
   // cb();
+}
+
+void HTTPServer::Listen(std::size_t PORT, std::function<void()> cb) {
+  this->ListenHelper(PORT, "localhost", cb);
 };
+
+void HTTPServer::Listen(std::size_t PORT, const std::string& HOST, std::function<void()> cb) {
+  this->ListenHelper(PORT, HOST, cb);
+}
 
 // not finished yet
 
-void HTTPServer::Use(middleware __middleware) {
-  for (auto it : this->__get_table) {
-    it.second.push_back(__middleware);
-  }
-  for (auto it : this->__post_table) {
-    it.second.push_back(__middleware);
-  }
-  for (auto it : this->__delete_table) {
-    it.second.push_back(__middleware);
-  }
-  for (auto it : this->__put_table) {
-    it.second.push_back(__middleware);
-  }
-  for (auto it : this->__patch_table) {
-    it.second.push_back(__middleware);
-  }
-  for (auto it : this->__head_table) {
-    it.second.push_back(__middleware);
-  }
-  for (auto it : this->__options_table) {
-    it.second.push_back(__middleware);
-  }
-};
-
-void HTTPServer::Use(const std::vector<middleware>& __middlewares) {
-  for (auto middleware : __middlewares) {
-    this->Use(middleware);
-  }
-};
-
-void HTTPServer::Use(const std::string& __path, middleware __middleware) {
-  this->__use_table[__path].push_back(__middleware);
+void HTTPServer::Use(const std::vector<HTTPServer::req_handler>& __req_handlers) {
+  this->Use("/", this->_Router().Use(__req_handlers));
 };
 
 void HTTPServer::Use(const std::string& __path, 
-                     const std::vector<middleware>& __middlewares) 
+                     const std::vector<HTTPServer::req_handler>& __req_handlers) 
 {
-  for (auto middleware : __middlewares) {
-    this->Use(__path, middleware);
-  }
+  this->Use(__path, this->_Router().Use(__path, __req_handlers));
 };
 
+void HTTPServer::Use(const std::string& __path, const HTTPServer::__Router& __router) {
+  std::cout << __path << std::endl;
+  __Router rt = __router;
+}
+
 void HTTPServer::Get(const std::string& __path, 
-                     const std::vector<middleware>& __middlewares) 
+                     const std::vector<HTTPServer::req_handler>& __req_handlers) 
 {
-  for (auto middleware : __middlewares) {
-    this->__get_table[__path].push_back(middleware);
+  std::cout << __path << std::endl;
+  for (auto it : __req_handlers) {
+    
   }
 };
 
 void HTTPServer::Post(const std::string& __path, 
-                      const std::vector<middleware>& __middlewares)
+                      const std::vector<HTTPServer::req_handler>& __req_handlers)
 {
-  for (auto middleware : __middlewares) {
-    this->__post_table[__path].push_back(middleware);
+  std::cout << __path << std::endl;
+  for (auto it : __req_handlers) {
+    
   }
 };
 
 void HTTPServer::Delete(const std::string& __path, 
-                        const std::vector<middleware>& __middlewares) 
+                        const std::vector<HTTPServer::req_handler>& __req_handlers) 
 {
-  for (auto middleware : __middlewares) {
-    this->__delete_table[__path].push_back(middleware);
+  std::cout << __path << std::endl;
+  for (auto it : __req_handlers) {
+    
   }
 };
 
-void HTTPServer::Put(const std::string& __path, 
-                     const std::vector<middleware>& __middlewares) 
-{
-  for (auto middleware : __middlewares) {
-    this->__put_table[__path].push_back(middleware);
-  }
+// void HTTPServer::Put(const std::string& __path, 
+//                      const std::vector<HTTPServer::req_handler>& __req_handlers) 
+// {
+  
+// };
+
+// void HTTPServer::Patch(const std::string& __path, 
+//                        const std::vector<HTTPServer::req_handler>& __req_handlers) 
+// {
+  
+// };
+
+// void HTTPServer::Head(const std::string& __path, 
+//                       const std::vector<HTTPServer::req_handler>& __req_handlers) 
+// {
+  
+// };
+
+// void HTTPServer::Options(const std::string& __path, 
+//                          const std::vector<HTTPServer::req_handler>& __req_handlers) 
+// {
+  
+// };
+
+Router HTTPServer::_Router() {
+  return Router();
 };
 
-void HTTPServer::Patch(const std::string& __path, 
-                       const std::vector<middleware>& __middlewares) 
-{
-  for (auto middleware : __middlewares) {
-    this->__patch_table[__path].push_back(middleware);
+Router HTTPServer::__Router::Use(const std::vector<HTTPServer::req_handler>& __req_handlers) {
+
+  if (this->__use_table.find("/") == this->__use_table.end()) {
+    this->__use_table["/"] = __req_handlers;
+  } else {
+    for (auto it : __req_handlers) {
+      this->__use_table["/"].push_back(it);
+    }
   }
+  return *this;
 };
 
-void HTTPServer::Head(const std::string& __path, 
-                      const std::vector<middleware>& __middlewares) 
-{
-  for (auto middleware : __middlewares) {
-    this->__head_table[__path].push_back(middleware);
+Router HTTPServer::__Router::Use(const std::string& __path, const std::vector<HTTPServer::req_handler>& __req_handlers) {
+  if (__path == "/") {
+    this->Use(__req_handlers);
+    return *this;
   }
+    // will check is valid path or not
+  if (this->__use_table.find(__path) == this->__use_table.end()) {
+    this->__use_table[__path] = __req_handlers;
+  } else {
+    for (auto it : __req_handlers) {
+      this->__use_table[__path].push_back(it);
+    }
+  }
+  return *this;
 };
 
-void HTTPServer::Options(const std::string& __path, 
-                         const std::vector<middleware>& __middlewares) 
-{
-  for (auto middleware : __middlewares) {
-    this->__options_table[__path].push_back(middleware);
+Router HTTPServer::__Router::Get(const std::string& __path, const std::vector<HTTPServer::req_handler>& __req_handlers) {
+  std::cout << __path << std::endl;
+  for (auto it : __req_handlers) {
+    
   }
+  return Router();
 };
+
+Router HTTPServer::__Router::Post(const std::string& __path, const std::vector<HTTPServer::req_handler>& __req_handlers) {
+  std::cout << __path << std::endl;
+  for (auto it : __req_handlers) {
+    
+  }
+  return Router();
+};
+
+Router HTTPServer::__Router::Delete(const std::string& __path, const std::vector<HTTPServer::req_handler>& __req_handlers) {
+  std::cout << __path << std::endl;
+  for (auto it : __req_handlers) {
+    
+  }
+  return Router();
+};
+
+// Router HTTPServer::__Router::Put(const std::string& __path, const std::vector<HTTPServer::req_handler>& __req_handlers) {
+
+// };
+
+// Router HTTPServer::__Router::Patch(const std::string& __path, const std::vector<HTTPServer::req_handler>& __req_handlers) {
+
+// };
+
+// Router HTTPServer::__Router::Head(const std::string& __path, const std::vector<HTTPServer::req_handler>& __req_handlers) {
+
+// };
+
+// Router HTTPServer::__Router::Options(const std::string& __path, const std::vector<HTTPServer::req_handler>& __req_handlers) {
+
+// };
+
+
+
+
+
+
+
+
+
+
 
 // void HTTPServer::HandleRequest() {
 //   char buffer[1024] = {0};

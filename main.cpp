@@ -1,6 +1,9 @@
 #include <iostream>
-#include <HTTPServer.hpp>
+#include <string>
+#include <vector>
+#include <HTTP.hpp>
 #include <header.hpp>
+
 
 int main(int argc, char** argv) {
   try {
@@ -11,6 +14,8 @@ int main(int argc, char** argv) {
 
 		HTTPServer server;
 		const std::size_t PORT = 4568;
+
+		// HTTPServer::Router router = server._Router();
 		
   	server.Listen(PORT, []() {
     	std::cout << "Server listening on PORT: " << PORT << std::endl;
